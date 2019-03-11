@@ -2,22 +2,18 @@ const restify = require('restify');
 const { BadRequestError, NotFoundError } = require('restify-errors');
 const MongoClient = require("mongodb").MongoClient;
 
+
+
+const server = restify.createServer();
+server.use(restify.plugins.bodyParser());
+
 const url = "mongodb://eeenkeeei:shiftr123@ds163825.mlab.com:63825/heroku_hw9cvg3q";
 const mongoClient = new MongoClient(url, { useNewUrlParser: true });
 mongoClient.connect(function(err, client) {
     const db = client.db("heroku_hw9cvg3q");
-    const collection = db.collection("users1");
-    let user = {name: "Tom", age: 23};
-    collection.insertOne(user, function (err, result) {
-        if (err) {
-            return console.log(err);
-        }
-        // взаимодействие с базой данных
-        client.close();
-    })
+    let collection = db.collection("users1");
+    console.log('CONNECTED TO MONGO');
 });
-const server = restify.createServer();
-server.use(restify.plugins.bodyParser());
 
 server.pre((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*'); // * - разрешаем всем
@@ -33,8 +29,7 @@ server.pre((req, res, next) => {
 });
 
 
-let nextId = 1;
-let items = [{item: 1}];
+let items = [];
 
 server.get('/items', (req, res, next) => {
     res.send(items);
@@ -42,32 +37,24 @@ server.get('/items', (req, res, next) => {
 });
 
 server.post('/items', (req, res, next) => {
-    const {id} = req.body;
-    if (typeof id !== 'number') {
-        next(new BadRequestError('Invalid JSON, must contain id'));
-        return;
-    }
-    if (items.length === 0) nextId = 1;
-    if (id === 0) {
-        req.body.id = nextId++;
-        items.push(req.body);
-
-    } else {
-        const index = items.findIndex((value) => {
-            return value.id === id;
+    console.log('ADD');
+    console.log(req.body);
+    let user = {name: req.body.nickname, password: req.body.password};
+    mongoClient.connect(function(err, client) {
+        const db = client.db("heroku_hw9cvg3q");
+        let collection = db.collection("users1");
+        console.log('CONNECTED TO MONGO');
+        collection.insertOne(user, function (err, result) {
+            if (err) {
+                return console.log(err);
+            }
+            // взаимодействие с базой данных
         });
+    });
 
-        if (index === -1) {
-            next(new NotFoundError('Item not found'));
-            return;
-        }
-
-        items[index] = req.body;
-    }
     res.send();
     next();
-    console.log('PUSH');
-    console.log(items);
+    console.log('ADD');
 });
 
 server.post('/items/:item', (req, res, next) => {
@@ -115,4 +102,5 @@ const port = process.env.PORT || 7777;
 
 server.listen(port, () => {
     console.log('server started');
+
 });

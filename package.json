@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node src/rest.js",
+    "start": "nodemon src/rest.js",
     "test": "exit 0"
   },
   "engines": {
