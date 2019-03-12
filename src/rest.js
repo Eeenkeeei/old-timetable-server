@@ -8,12 +8,9 @@ const server = restify.createServer();
 server.use(restify.plugins.bodyParser());
 
 const url = "mongodb://eeenkeeei:shiftr123@ds163825.mlab.com:63825/heroku_hw9cvg3q";
-const mongoClient = new MongoClient(url, { useNewUrlParser: true });
-mongoClient.connect(function(err, client) {
-    const db = client.db("heroku_hw9cvg3q");
-    let collection = db.collection("users1");
-    console.log('CONNECTED TO MONGO');
-});
+const mongoClient = new MongoClient(url, { useNewUrlParser: true, poolSize: 2,
+    promiseLibrary: global.Promise });
+
 
 server.pre((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*'); // * - разрешаем всем
@@ -44,15 +41,22 @@ server.post('/items', (req, res, next) => {
         const db = client.db("heroku_hw9cvg3q");
         let collection = db.collection("users1");
         console.log('CONNECTED TO MONGO');
+
         collection.insertOne(user, function (err, result) {
             if (err) {
                 return console.log(err);
             }
             // взаимодействие с базой данных
         });
+        collection.find({name: "Testname"}).toArray(function(err, results){
+            console.log('RESULT');
+            console.log(results);
+            return(results);
+        });
     });
 
     res.send();
+    console.log('res', res.)
     next();
     console.log('ADD');
 });
