@@ -1,16 +1,13 @@
 const restify = require('restify');
-const { BadRequestError, NotFoundError } = require('restify-errors');
+const {BadRequestError, NotFoundError} = require('restify-errors');
 const MongoClient = require("mongodb").MongoClient;
-
 
 
 const server = restify.createServer();
 server.use(restify.plugins.bodyParser());
 
 const url = "mongodb://eeenkeeei:shiftr123@ds163825.mlab.com:63825/heroku_hw9cvg3q";
-const mongoClient = new MongoClient(url, { useNewUrlParser: true, poolSize: 2,
-    promiseLibrary: global.Promise });
-
+const mongoClient = new MongoClient(url, {useNewUrlParser: true});
 
 server.pre((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*'); // * - разрешаем всем
@@ -33,72 +30,49 @@ server.get('/items', (req, res, next) => {
     next();
 });
 
-server.post('/items', (req, res, next) => {
-    console.log('ADD');
+
+
+server.get('/resultFlag', (req, res, next) => {
+    console.log('SEND', resultFlag);
+    res.send(resultFlag);
+    next();
+});
+
+let resultFlag = '';
+
+server.post('/resultFlag', (req, res, next) => {
+    console.log('Пришел объект:');
     console.log(req.body);
     let user = {name: req.body.nickname, password: req.body.password};
-    mongoClient.connect(function(err, client) {
+    mongoClient.connect(function (err, client) {
         const db = client.db("heroku_hw9cvg3q");
-        let collection = db.collection("users1");
-        console.log('CONNECTED TO MONGO');
+        const collection = db.collection("users");
+        collection.find({name: req.body.nickname}).toArray(function (err, result) {
+            if (result.length === 0) {
+                resultFlag = 'true';
+                console.log(resultFlag);
+                console.log('Копий нет');
+                collection.insertOne(user, function (err, result) {
+                    console.log('Добавлено');
+                    if (err) {
+                        return console.log(err);
+                    }
+                });
+                res.send(resultFlag);
 
-        collection.insertOne(user, function (err, result) {
-            if (err) {
-                return console.log(err);
+            } else {
+                resultFlag = 'false';
+                console.log(resultFlag);
+                console.log('Есть копия, не добавлено');
+                res.send(resultFlag);
+
+                if (err) {
+                    return console.log(err);
+                }
             }
-            // взаимодействие с базой данных
         });
-        collection.find({name: "Testname"}).toArray(function(err, results){
-            console.log('RESULT');
-            console.log(results);
-            return(results);
-        });
+
     });
-
-    res.send();
-    console.log('res', res.)
-    next();
-    console.log('ADD');
-});
-
-server.post('/items/:item', (req, res, next) => {
-    console.log ('EARLY OBJECT', items[req.body.id-1]);
-    items[req.body.id-1].name = req.body.name;
-    items[req.body.id-1].tag = req.body.tag;
-    items[req.body.id-1].link = req.body.link;
-    items[req.body.id-1].location = req.body.location;
-    console.log ('NEW OBJECT', items[req.body.id-1]);
-    console.log('NEW MASSIVE');
-    console.log(items);
-    res.send();
-    next();
-});
-
-server.del ('/items', (req, res, next) => {
-    items = [];
-    console.log('DELETE STARTED');
-    res.send();
-    next();
-});
-
-server.del('/items/:id', (req, res, next) => {
-    const id = Number(req.params.id);
-    if (isNaN(id)) {
-        return next(new BadRequestError('Invalid id'));
-    }
-
-    const index = items.findIndex((value) => {
-        return value.id === id;
-    });
-
-    if (index === -1) {
-        next(new NotFoundError('Item not found'));
-        return;
-    }
-    items.splice(index, 1);
-    console.log('NEW MASSIVE');
-    console.log(items);
-    res.send();
     next();
 });
 
