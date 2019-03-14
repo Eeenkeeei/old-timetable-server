@@ -26,7 +26,8 @@
     "jsonwebtoken": "^8.5.0",
     "mongodb": "^3.1.13",
     "restify": "^7.7.0",
-    "restify-errors": "^6.1.1"
+    "restify-errors": "^6.1.1",
+    "restify-jwt": "^0.3.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
