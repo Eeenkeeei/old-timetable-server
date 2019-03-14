@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/rest.js",
     "backend": "nodemon src/rest.js",
-
+    "test1": "nodemon src/test.js",
     "test": "exit 0"
   },
   "engines": {
@@ -25,6 +25,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "jsonwebtoken": "^8.5.0",
     "mongodb": "^3.1.13",
     "restify": "^7.7.0",
     "restify-errors": "^6.1.1"
@@ -36,6 +37,7 @@
     "babel-jest": "^24.1.0",
     "jest": "^24.1.0",
     "live-server": "^1.2.1",
-    "nodemon": "^1.18.10"
+    "nodemon": "^1.18.10",
+    "restify-jwt": "^0.3.0"
   }
 }
