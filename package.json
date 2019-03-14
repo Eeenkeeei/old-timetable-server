@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/rest.js",
+    "nodemon": "nodemon src/rest.js",
     "test": "exit 0"
   },
   "engines": {
@@ -34,6 +35,7 @@
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.3.1",
     "babel-jest": "^24.1.0",
+    "mongodb": "^3.1.13",
     "jest": "^24.1.0",
     "live-server": "^1.2.1",
     "nodemon": "^1.18.10",
