@@ -5,8 +5,6 @@
   "main": "index.js",
   "scripts": {
     "start": "node src/rest.js",
-    "backend": "nodemon src/rest.js",
-    "test1": "nodemon src/test.js",
     "test": "exit 0"
   },
   "engines": {
