@@ -65,7 +65,13 @@ let resultFlag = '';
 server.post('/resultFlag', (req, res, next) => {
     console.log('Пришел объект:');
     console.log(req.body);
-    let user = {username: req.body.nickname, password: req.body.password};
+    let user = {username: req.body.nickname, password: req.body.password, email: "email", gender: "", age: "",
+                timetable: [{Sunday1:[{name1: "name1", note: "note"}, {name2: "name2", note: "note"},
+                {name2: "name2", note: "note"}], Monday1:[{name1: "name1", note: "note"}, {name2: "name2", note: "note"}, {name2: "name2", note: "note"}]}],
+                readLater: [{linkName: "name", linkTag: "tags", link: "link", done:"done"}],
+                tasks: [{taskName: "name", done: "done"}, {taskName: "name1", done: "done"}],
+                notes: [{noteName: "noteName1", note: "note text"}]
+    };
     if (user.username.length > 4 && user.password.length > 7) {
         mongoClient.connect(function (err, client) {
             const db = client.db("heroku_hw9cvg3q");
