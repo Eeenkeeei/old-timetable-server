@@ -72,38 +72,44 @@ server.post('/resultFlag', (req, res, next) => {
                 tasks: [{taskName: "name", done: "done"}, {taskName: "name1", done: "done"}],
                 notes: [{noteName: "noteName1", note: "note text"}]
     };
-    if (user.username.length > 4 && user.password.length > 7) {
-        mongoClient.connect(function (err, client) {
-            const db = client.db("heroku_hw9cvg3q");
-            const collection = db.collection("users");
-            collection.find({username: req.body.nickname}).toArray(function (err, result) {
-                if (result.length === 0) {
-                    resultFlag = 'true';
-                    console.log(resultFlag);
-                    console.log('Копий нет');
-                    collection.insertOne(user, function (err, result) {
-                        console.log('Добавлено');
+    if (req.body.password === req.body.passwordConfirm) {
+        if (user.username.length > 4 && user.password.length > 7) {
+            mongoClient.connect(function (err, client) {
+                const db = client.db("heroku_hw9cvg3q");
+                const collection = db.collection("users");
+                collection.find({username: req.body.nickname}).toArray(function (err, result) {
+                    if (result.length === 0) {
+                        resultFlag = 'true';
+                        console.log(resultFlag);
+                        console.log('Копий нет');
+                        collection.insertOne(user, function (err, result) {
+                            console.log('Добавлено');
+                            if (err) {
+                                return console.log(err);
+                            }
+                        });
+                        res.send(resultFlag);
+
+                    } else {
+                        resultFlag = 'false';
+                        console.log(resultFlag);
+                        console.log('Есть копия, не добавлено');
+                        res.send(resultFlag);
+
                         if (err) {
                             return console.log(err);
                         }
-                    });
-                    res.send(resultFlag);
-
-                } else {
-                    resultFlag = 'false';
-                    console.log(resultFlag);
-                    console.log('Есть копия, не добавлено');
-                    res.send(resultFlag);
-
-                    if (err) {
-                        return console.log(err);
                     }
-                }
+                });
             });
-        });
+        } else {
+            console.log('Не удовл. условиям');
+            resultFlag = 'Bad Request'; // отправит bad Request если нарушены условия по длине
+            res.send(resultFlag);
+        }
     } else {
-        console.log('Не удовл. условиям');
-        resultFlag = 'Bad Request'; // отправит bad Request если нарушены условия по длине
+        console.log('Пароли не совпадают');
+        resultFlag = 'Bad Password'; // отправит bad Request если нарушены условия по длине
         res.send(resultFlag);
     }
     next();
