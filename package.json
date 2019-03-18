@@ -28,7 +28,10 @@
     "mongodb": "^3.1.13",
     "restify": "^7.7.0",
     "restify-errors": "^6.1.1",
-    "restify-jwt": "^0.3.0"
+    "restify-jwt": "^0.3.0",
+    "serve-static": "^1.13.2",
+    "serve-static-restify": "^3.0.0",
+    "watershed": "^0.4.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.2.3",
@@ -39,6 +42,8 @@
     "jest": "^24.1.0",
     "live-server": "^1.2.1",
     "nodemon": "^1.18.10",
-    "restify-jwt": "^0.3.0"
+    "restify-jwt": "^0.3.0",
+    "serve-static": "^1.13.2",
+    "serve-static-restify": "^3.0.0"
   }
 }
