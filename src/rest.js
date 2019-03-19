@@ -62,6 +62,14 @@ server.post('/updateData', (req, res, next) => {
     console.log('UPDATE DATA');
     let userData = req.body;
     console.log(userData);
+    if (isNaN(req.body.age) === true) {
+        console.log('В возрасте не число');
+        resultFlag = 'Bad Request(age)';
+        res.send(resultFlag);
+        next();
+        return;
+    }
+
     mongoClient.connect(function (err, client) {
         const db = client.db("heroku_hw9cvg3q");
         const collection = db.collection("users");
@@ -79,8 +87,8 @@ server.post('/updateData', (req, res, next) => {
         });
         resultFlag = 'Data updated';
         console.log(resultFlag);
+        res.send(resultFlag);
     });
-    res.send(resultFlag);
     next();
 });
 
