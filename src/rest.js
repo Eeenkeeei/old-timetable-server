@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 const config = require('./config');
 const user = require('./user');
 const watershed = require('watershed');
-const server = restify.createServer();
+const server = restify.createServer({handleUpgrades: true});
 const serveStatic = require('serve-static-restify');
 const ws = new watershed.Watershed();
 
@@ -14,11 +14,12 @@ server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 
 server.use(rjwt(config.jwt).unless({
-    path: ['/auth', '/resultFlag', '/updateData'],
+    path: ['/auth', '/resultFlag', '/updateData', '/websocket/attach'],
 }));
 
 const url = "mongodb://eeenkeeei:shiftr123@ds163825.mlab.com:63825/heroku_hw9cvg3q";
 const mongoClient = new MongoClient(url, {useNewUrlParser: true});
+
 
 server.pre((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*'); // * - разрешаем всем
@@ -55,6 +56,7 @@ server.post('/auth', (req, res, next) => {
         res.send({iat, exp, token});
     });
 });
+let resultFlag = '';
 
 server.post('/updateData', (req, res, next) => {
     console.log('UPDATE DATA');
@@ -74,13 +76,13 @@ server.post('/updateData', (req, res, next) => {
             tasks: req.body.tasks,
             notes: req.body.notes
         });
-        console.log('UPDATED');
+        resultFlag = 'Data updated';
+        console.log(resultFlag);
     });
-    res.send();
+    res.send(resultFlag);
     next();
 });
 
-let resultFlag = '';
 
 server.post('/resultFlag', (req, res, next) => {
     console.log('Пришел объект:');
@@ -96,76 +98,80 @@ server.post('/resultFlag', (req, res, next) => {
         tasks: [{taskName: "name", done: "done"}, {taskName: "name1", done: "done"}],
         notes: [{noteName: "noteName1", note: "note text"}]
     };
-    // todo: разбить
-    if (req.body.password === req.body.passwordConfirm) {
-        if (user.username.length > 4 && user.password.length > 7) {
-            mongoClient.connect(function (err, client) {
-                const db = client.db("heroku_hw9cvg3q");
-                const collection = db.collection("users");
-                collection.find({username: req.body.nickname}).toArray(function (err, result) {
-                    if (result.length === 0) {
-                        resultFlag = 'true';
-                        console.log(resultFlag);
-                        console.log('Копий нет');
-                        collection.insertOne(user, function (err, result) {
-                            console.log('Добавлено');
-                            if (err) {
-                                return console.log(err);
-                            }
-                        });
-                        res.send(resultFlag);
 
-                    } else {
-                        resultFlag = 'false';
-                        console.log(resultFlag);
-                        console.log('Есть копия, не добавлено');
-                        res.send(resultFlag);
-
-                        if (err) {
-                            return console.log(err);
-                        }
-                    }
-                });
-            });
-        } else {
-            console.log('Не удовл. условиям');
-            resultFlag = 'Bad Request'; // отправит bad Request если нарушены условия по длине
-            res.send(resultFlag);
-        }
-    } else {
-        console.log('Пароли не совпадают');
+    if (req.body.password !== req.body.passwordConfirm) {
+        console.log('Пароли не совпадают1');
         resultFlag = 'Bad Password'; // отправит bad Request если нарушены условия по длине
         res.send(resultFlag);
+        next();
+        return;
     }
+
+    if (user.username.length < 4 || user.password.length < 7) {
+        console.log('Не удовл. условиям');
+        resultFlag = 'Bad Request'; // отправит bad Request если нарушены условия по длине
+        res.send(resultFlag);
+        next();
+        return;
+    }
+
+    mongoClient.connect(function (err, client) {
+        const db = client.db("heroku_hw9cvg3q");
+        const collection = db.collection("users");
+        collection.find({username: req.body.nickname}).toArray(function (err, result) {
+            if (result.length === 0) {
+                resultFlag = 'true';
+                console.log(resultFlag);
+                console.log('Копий нет');
+                collection.insertOne(user, function (err, result) {
+                    console.log('Добавлено');
+                    if (err) {
+                        return console.log(err);
+                    }
+                });
+                res.send(resultFlag);
+
+            } else {
+                resultFlag = 'false';
+                console.log(resultFlag);
+                console.log('Есть копия, не добавлено');
+                res.send(resultFlag);
+
+                if (err) {
+                    return console.log(err);
+                }
+            }
+        });
+    });
     next();
 });
 
 const port = process.env.PORT || 7777;
-//
-// server.get('/websocket/attach', function (req, res, next) {
-//     if (!res.claimUpgrade) {
-//         next(new Error('Connection Must Upgrade For WebSockets'));
-//         return;
-//     }
-//     console.log("upgrade claimed");
-//
-//     var upgrade = res.claimUpgrade();
-//     var shed = ws.accept(req, upgrade.socket, upgrade.head);
-//
-//     shed.on('text', function(msg) {
-//         console.log('Received message from websocket client: ' + msg);
-//     });
-//
-//     shed.send('hello there!');
-//
-//     next(false);
-// });
-//
-// // For a complete sample, here is an ability to serve up a subfolder:
-// server.get('/', restify.plugins.serveStatic({
-//     directory: './static',
-//     default: 'index.html'
-// }));
+
+server.get('/websocket/attach', function (req, res, next) {
+    if (!res.claimUpgrade) {
+        next(new Error('Connection Must Upgrade For WebSockets'));
+        return;
+    }
+    console.log("upgrade claimed");
+
+    var upgrade = res.claimUpgrade();
+    var shed = ws.accept(req, upgrade.socket, upgrade.head);
+
+    shed.on('text', function (msg) {
+        console.log('Received message from websocket client: ' + msg);
+    });
+
+    shed.send('Сообщение');
+
+    next(false);
+});
+
+// For a complete sample, here is an ability to serve up a subfolder:
+server.get('/test', restify.plugins.serveStatic({
+    directory: './static',
+    default: 'index.html'
+}));
 
 server.listen(port, () => {
     console.log('server started');
