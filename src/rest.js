@@ -14,7 +14,7 @@ server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 
 server.use(rjwt(config.jwt).unless({
-    path: ['/auth', '/resultFlag', '/updateData', '/websocket/attach'],
+    path: ['/auth', '/registration', '/updateData', '/websocket/attach'],
 }));
 
 const url = "mongodb://eeenkeeei:shiftr123@ds163825.mlab.com:63825/heroku_hw9cvg3q";
@@ -69,6 +69,7 @@ server.post('/updateData', (req, res, next) => {
             username: req.body.username,
             password: req.body.password,
             email: req.body.email,
+            edu: req.body.edu,
             gender: req.body.gender,
             age: req.body.age,
             timetable: req.body.timetable,
@@ -84,11 +85,12 @@ server.post('/updateData', (req, res, next) => {
 });
 
 
-server.post('/resultFlag', (req, res, next) => {
+server.post('/registration', (req, res, next) => {
     console.log('Пришел объект:');
     console.log(req.body);
     let user = {
-        username: req.body.nickname, password: req.body.password, email: "email", gender: "", age: "",
+        username: req.body.nickname, password: req.body.password, edu: req.body.edu,
+        email: req.body.email, gender: req.body.gender, age: req.body.age,
         timetable: [{
             Sunday1: [{name1: "name1", note: "note"}, {name2: "name2", note: "note"},
                 {name2: "name2", note: "note"}],
@@ -100,8 +102,16 @@ server.post('/resultFlag', (req, res, next) => {
     };
 
     if (req.body.password !== req.body.passwordConfirm) {
-        console.log('Пароли не совпадают1');
-        resultFlag = 'Bad Password'; // отправит bad Request если нарушены условия по длине
+        console.log('Пароли не совпадают');
+        resultFlag = 'Bad Password';
+        res.send(resultFlag);
+        next();
+        return;
+    }
+
+    if (isNaN(req.body.age) === true) {
+        console.log('В возрасте не число');
+        resultFlag = 'Bad Request(age)';
         res.send(resultFlag);
         next();
         return;
@@ -155,8 +165,8 @@ server.get('/websocket/attach', function (req, res, next) {
     }
     console.log("upgrade claimed");
 
-    var upgrade = res.claimUpgrade();
-    var shed = ws.accept(req, upgrade.socket, upgrade.head);
+    const upgrade = res.claimUpgrade();
+    const shed = ws.accept(req, upgrade.socket, upgrade.head);
 
     shed.on('text', function (msg) {
         console.log('Received message from websocket client: ' + msg);
@@ -167,7 +177,6 @@ server.get('/websocket/attach', function (req, res, next) {
     next(false);
 });
 
-// For a complete sample, here is an ability to serve up a subfolder:
 server.get('/test', restify.plugins.serveStatic({
     directory: './static',
     default: 'index.html'
