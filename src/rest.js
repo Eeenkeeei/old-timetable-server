@@ -14,7 +14,7 @@ server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 
 server.use(rjwt(config.jwt).unless({
-    path: ['/auth', '/registration', '/updateData', '/websocket/attach'],
+    path: ['/auth', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate'],
 }));
 
 const url = "mongodb://eeenkeeei:shiftr123@ds163825.mlab.com:63825/heroku_hw9cvg3q";
@@ -58,6 +58,35 @@ server.post('/auth', (req, res, next) => {
 });
 let resultFlag = '';
 
+server.post('/timetableUpdate', (req, res, next) => {
+    console.log('UPDATE DATA');
+    let userData = req.body;
+    console.log(userData);
+    console.log(userData.username);
+
+
+    mongoClient.connect(function (err, client) {
+        const db = client.db("heroku_hw9cvg3q");
+        const collection = db.collection("users");
+        collection.replaceOne({username: userData.username}, {
+            username: req.body.username,
+            password: req.body.password,
+            email: req.body.email,
+            edu: req.body.edu,
+            gender: req.body.gender,
+            age: req.body.age,
+            timetable: req.body.timetable,
+            readLater: req.body.readLater,
+            tasks: req.body.tasks,
+            notes: req.body.notes
+        });
+        resultFlag = 'Data updated';
+        console.log(resultFlag);
+        res.send(resultFlag);
+    });
+    next();
+});
+
 server.post('/updateData', (req, res, next) => {
     console.log('UPDATE DATA');
     let userData = req.body;
@@ -92,22 +121,21 @@ server.post('/updateData', (req, res, next) => {
     next();
 });
 
+let timetable = [
 
+];
 server.post('/registration', (req, res, next) => {
     console.log('Пришел объект:');
     console.log(req.body);
     let user = {
-        username: req.body.nickname, password: req.body.password, edu: req.body.edu,
-        email: req.body.email, gender: req.body.gender, age: req.body.age,
-        timetable: [{
-            Sunday1: [{name1: "name1", note: "note"}, {name2: "name2", note: "note"},
-                {name2: "name2", note: "note"}],
-            Monday1: [{name1: "name1", note: "note"}, {name2: "name2", note: "note"}, {name2: "name2", note: "note"}]
-        }],
+            username: req.body.nickname, password: req.body.password, edu: req.body.edu,
+            email: req.body.email, gender: req.body.gender, age: req.body.age,
+            timetable,
         readLater: [{linkName: "name", linkTag: "tags", link: "link", done: "done"}],
         tasks: [{taskName: "name", done: "done"}, {taskName: "name1", done: "done"}],
         notes: [{noteName: "noteName1", note: "note text"}]
-    };
+}
+    ;
 
     if (req.body.password !== req.body.passwordConfirm) {
         console.log('Пароли не совпадают');
