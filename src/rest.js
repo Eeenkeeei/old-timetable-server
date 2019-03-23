@@ -62,9 +62,8 @@ server.post('/timetableUpdate', (req, res, next) => {
     console.log('UPDATE DATA');
     let userData = req.body;
     console.log(userData);
-    console.log(userData.username);
 
-
+// todo: валидация
     mongoClient.connect(function (err, client) {
         const db = client.db("heroku_hw9cvg3q");
         const collection = db.collection("users");
@@ -80,7 +79,7 @@ server.post('/timetableUpdate', (req, res, next) => {
             tasks: req.body.tasks,
             notes: req.body.notes
         });
-        resultFlag = 'Data updated';
+        resultFlag = 'Timetable Updated';
         console.log(resultFlag);
         res.send(resultFlag);
     });
