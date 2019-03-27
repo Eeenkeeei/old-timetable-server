@@ -192,30 +192,30 @@ server.post('/registration', (req, res, next) => {
 });
 
 const port = process.env.PORT || 7777;
-
-server.get('/websocket/attach', function (req, res, next) {
-    if (!res.claimUpgrade) {
-        next(new Error('Connection Must Upgrade For WebSockets'));
-        return;
-    }
-    console.log("upgrade claimed");
-
-    const upgrade = res.claimUpgrade();
-    const shed = ws.accept(req, upgrade.socket, upgrade.head);
-
-    shed.on('text', function (msg) {
-        console.log('Received message from websocket client: ' + msg);
-    });
-
-    shed.send('Сообщение');
-
-    next(false);
-});
-
-server.get('/test', restify.plugins.serveStatic({
-    directory: './static',
-    default: 'index.html'
-}));
+//
+// server.get('/websocket/attach', function (req, res, next) {
+//     if (!res.claimUpgrade) {
+//         next(new Error('Connection Must Upgrade For WebSockets'));
+//         return;
+//     }
+//     console.log("upgrade claimed");
+//
+//     const upgrade = res.claimUpgrade();
+//     const shed = ws.accept(req, upgrade.socket, upgrade.head);
+//
+//     shed.on('text', function (msg) {
+//         console.log('Received message from websocket client: ' + msg);
+//     });
+//
+//     shed.send('Сообщение');
+//
+//     next(false);
+// });
+//
+// server.get('/test', restify.plugins.serveStatic({
+//     directory: './static',
+//     default: 'index.html'
+// }));
 
 server.listen(port, () => {
     console.log('server started');
