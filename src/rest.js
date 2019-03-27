@@ -14,7 +14,7 @@ server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 
 server.use(rjwt(config.jwt).unless({
-    path: ['/auth', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate'],
+    path: ['/auth', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync'],
 }));
 
 const url = "mongodb://eeenkeeei:shiftr123@ds163825.mlab.com:63825/heroku_hw9cvg3q";
@@ -192,30 +192,46 @@ server.post('/registration', (req, res, next) => {
 });
 
 const port = process.env.PORT || 7777;
-//
-// server.get('/websocket/attach', function (req, res, next) {
-//     if (!res.claimUpgrade) {
-//         next(new Error('Connection Must Upgrade For WebSockets'));
-//         return;
-//     }
-//     console.log("upgrade claimed");
-//
-//     const upgrade = res.claimUpgrade();
-//     const shed = ws.accept(req, upgrade.socket, upgrade.head);
-//
-//     shed.on('text', function (msg) {
-//         console.log('Received message from websocket client: ' + msg);
-//     });
-//
-//     shed.send('Сообщение');
-//
-//     next(false);
-// });
-//
-// server.get('/test', restify.plugins.serveStatic({
-//     directory: './static',
-//     default: 'index.html'
-// }));
+let acceptedUsername;
+
+server.get('/updateData',  (req, res, next) => {
+    if (!res.claimUpgrade) {
+        next(new Error('Connection Must Upgrade For WebSockets'));
+        return;
+    }
+    const upgrade = res.claimUpgrade();
+    const shed = ws.accept(req, upgrade.socket, upgrade.head);
+
+    shed.on('text', function (msg) {
+        acceptedUsername = msg;
+        console.log('User: ' + msg);
+        const response = {
+            username: acceptedUsername,
+            msg: "Update"
+        };
+        shed.send(JSON.stringify(response));
+    });
+
+    next(false);
+});
+
+server.get('/sync', (req, res, next) => {
+    if (!res.claimUpgrade) {
+        next(new Error('Connection Must Upgrade For WebSockets'));
+        return;
+    }
+    const upgrade = res.claimUpgrade();
+    const shed = ws.accept(req, upgrade.socket, upgrade.head);
+
+    const response = {
+        username: acceptedUsername,
+        msg: "Update"
+    };
+    shed.send(JSON.stringify(response));
+    next(false);
+});
+
+
 
 server.listen(port, () => {
     console.log('server started');
