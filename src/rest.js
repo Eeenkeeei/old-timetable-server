@@ -77,7 +77,9 @@ server.post('/timetableUpdate', (req, res, next) => {
             timetable: req.body.timetable,
             readLater: req.body.readLater,
             tasks: req.body.tasks,
-            notes: req.body.notes
+            notes: req.body.notes,
+            lessonsTimetable: req.body.lessonsTimetable,
+            startPage: req.body.startPage
         });
         resultFlag = 'Timetable Updated';
         console.log(resultFlag);
@@ -111,7 +113,9 @@ server.post('/updateData', (req, res, next) => {
             timetable: req.body.timetable,
             readLater: req.body.readLater,
             tasks: req.body.tasks,
-            notes: req.body.notes
+            notes: req.body.notes,
+            lessonsTimetable: req.body.lessonsTimetable,
+            startPage: req.body.startPage
         });
         resultFlag = 'Data updated';
         console.log(resultFlag);
@@ -120,9 +124,7 @@ server.post('/updateData', (req, res, next) => {
     next();
 });
 
-let timetable = [
-
-];
+let timetable = [];
 server.post('/registration', (req, res, next) => {
     console.log('Пришел объект:');
     console.log(req.body);
@@ -130,10 +132,12 @@ server.post('/registration', (req, res, next) => {
             username: req.body.nickname, password: req.body.password, edu: req.body.edu,
             email: req.body.email, gender: req.body.gender, age: req.body.age,
             timetable,
-        readLater: [{linkName: "name", linkTag: "tags", link: "link", done: "done"}],
-        tasks: [{taskName: "name", done: "done"}, {taskName: "name1", done: "done"}],
-        notes: [{noteName: "noteName1", note: "note text"}]
-}
+            readLater: [{linkName: "name", linkTag: "tags", link: "link", done: "done"}],
+            tasks: [{taskName: "name", done: "done"}, {taskName: "name1", done: "done"}],
+            notes: [{noteName: "noteName1", note: "note text"}],
+            lessonsTimetable: req.body.lessonsTimetable,
+            startPage: 'account.html'
+        }
     ;
 
     if (req.body.password !== req.body.passwordConfirm) {
@@ -194,7 +198,7 @@ server.post('/registration', (req, res, next) => {
 const port = process.env.PORT || 7777;
 let acceptedUsername;
 
-server.get('/updateData',  (req, res, next) => {
+server.get('/updateData', (req, res, next) => {
     if (!res.claimUpgrade) {
         next(new Error('Connection Must Upgrade For WebSockets'));
         return;
@@ -230,7 +234,6 @@ server.get('/sync', (req, res, next) => {
     shed.send(JSON.stringify(response));
     next(false);
 });
-
 
 
 server.listen(port, () => {
