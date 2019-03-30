@@ -1,5 +1,5 @@
 const restify = require('restify');
-const {BadRequestError, NotFoundError, InvalidCredentialsError} = require('restify-errors');
+const {BadRequestError, NotFoundError, InvalidCredentialsError, UnauthorizedError} = require('restify-errors');
 const MongoClient = require("mongodb").MongoClient;
 const rjwt = require('restify-jwt');
 const jwt = require('jsonwebtoken');
@@ -41,7 +41,7 @@ server.get('/user', (req, res, next) => {
 server.post('/auth', (req, res, next) => {
     let {username, password} = req.body;
     console.log(username, password);
-    user.authenticate(username, password).then((data, err) => {
+    user.authenticate(username, password).then((data, e) => {
         try {
             console.log(data);
             if (data === null) {
@@ -54,8 +54,9 @@ server.post('/auth', (req, res, next) => {
             let {iat, exp} = jwt.decode(token);
             console.log('token', token);
             res.send({iat, exp, token});
+            next()
         } catch (e) {
-            return next(new InvalidCredentialsError('Bad auth'));
+            return next(new InvalidCredentialsError());
         }
 
     });
