@@ -14,7 +14,7 @@ server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 
 server.use(rjwt(config.jwt).unless({
-    path: ['/auth', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync'],
+    path: ['/auth', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync', '/changePassword'],
 }));
 
 const url = "mongodb://eeenkeeei:shiftr123@ds163825.mlab.com:63825/heroku_hw9cvg3q";
@@ -87,6 +87,59 @@ server.post('/timetableUpdate', (req, res, next) => {
     });
     next();
 });
+
+server.post('/changePassword', (req, res, next) => {
+    console.log('CHANGE PASSWORD');
+    let userData = req.body;
+    let oldPassword = req.body.oldPassword;
+    let newPassword = req.body.newPassword;
+    let confirmNewPassword = req.body.confirmNewPassword;
+    if (newPassword === oldPassword){
+        console.log('Старый и новый пароль совпадает');
+        res.send ('Passwords matches');
+        next();
+        return;
+    }
+    if (newPassword.length < 7){
+        console.log('Длина пароля меньше 8');
+        res.send('Bad password length');
+        next();
+        return;
+    }
+    if (newPassword !== confirmNewPassword){
+        console.log('Пароли не совпадают');
+        res.send('Bad confirm');
+        next();
+        return;
+    }
+    mongoClient.connect(async function (err, client) {
+        const db = client.db("heroku_hw9cvg3q");
+        const collection = db.collection("users");
+        collection.find({username: req.body.username}).toArray(function (err, result) {
+            if (result.length !== 0) {
+                userData = result;
+                if (userData[0].password === oldPassword) {
+                    console.log('Пароли совпадают');
+                    let newData = {
+                        username: userData[0].username,
+                        password: confirmNewPassword
+                    };
+                    console.log(newData);
+                    res.send('Updated');
+                    return;
+                } else {
+                    console.log('Старый пароль не совпадает');
+                    res.send('Not confirmed');
+                    return;
+                }
+
+            }
+        });
+    });
+    console.log(userData);
+    next();
+});
+
 
 server.post('/updateData', (req, res, next) => {
     console.log('UPDATE DATA');
