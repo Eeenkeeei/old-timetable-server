@@ -41,8 +41,8 @@ server.get('/user', (req, res, next) => {
 server.post('/auth', (req, res, next) => {
     let {username, password} = req.body;
     console.log(username, password);
-    try {
-        user.authenticate(username, password).then((data, err) => {
+    user.authenticate(username, password).then((data, err) => {
+        try {
             console.log(data);
             if (data === null) {
                 res.send('Null');
@@ -54,10 +54,11 @@ server.post('/auth', (req, res, next) => {
             let {iat, exp} = jwt.decode(token);
             console.log('token', token);
             res.send({iat, exp, token});
-        });
-    } catch (err) {
-        return next(new InvalidCredentialsError('Bad auth'));
-    }
+        } catch (e) {
+            return next(new InvalidCredentialsError('Bad auth'));
+        }
+
+    });
 
 });
 let resultFlag = '';
@@ -98,13 +99,13 @@ server.post('/changePassword', (req, res, next) => {
     let oldPassword = req.body.oldPassword;
     let newPassword = req.body.newPassword;
     let confirmNewPassword = req.body.confirmNewPassword;
-    if (newPassword.length < 7){
+    if (newPassword.length < 7) {
         console.log('Длина пароля меньше 8');
         res.send('Bad password length');
         next();
         return;
     }
-    if (newPassword !== confirmNewPassword){
+    if (newPassword !== confirmNewPassword) {
         console.log('Пароли не совпадают');
         res.send('Bad confirm');
         next();
@@ -116,9 +117,9 @@ server.post('/changePassword', (req, res, next) => {
         collection.find({username: req.body.username}).toArray(function (err, result) {
             if (result.length !== 0) {
                 userData = result[0];
-                if (newPassword === userData.password){
+                if (newPassword === userData.password) {
                     console.log('Старый и новый пароль совпадает');
-                    res.send ('Passwords matches');
+                    res.send('Passwords matches');
                     next();
                     return;
                 }
@@ -128,7 +129,7 @@ server.post('/changePassword', (req, res, next) => {
                         username: userData.username,
                         password: confirmNewPassword
                     };
-                    collection.updateOne({username : userData.username}, {$set: {password : confirmNewPassword}});
+                    collection.updateOne({username: userData.username}, {$set: {password: confirmNewPassword}});
                     console.log(newData);
                     res.send('Updated');
                     return;
