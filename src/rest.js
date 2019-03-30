@@ -94,12 +94,6 @@ server.post('/changePassword', (req, res, next) => {
     let oldPassword = req.body.oldPassword;
     let newPassword = req.body.newPassword;
     let confirmNewPassword = req.body.confirmNewPassword;
-    if (newPassword === oldPassword){
-        console.log('Старый и новый пароль совпадает');
-        res.send ('Passwords matches');
-        next();
-        return;
-    }
     if (newPassword.length < 7){
         console.log('Длина пароля меньше 8');
         res.send('Bad password length');
@@ -117,13 +111,20 @@ server.post('/changePassword', (req, res, next) => {
         const collection = db.collection("users");
         collection.find({username: req.body.username}).toArray(function (err, result) {
             if (result.length !== 0) {
-                userData = result;
-                if (userData[0].password === oldPassword) {
-                    console.log('Пароли совпадают');
+                userData = result[0];
+                if (newPassword === userData.password){
+                    console.log('Старый и новый пароль совпадает');
+                    res.send ('Passwords matches');
+                    next();
+                    return;
+                }
+                if (userData.password === oldPassword) {
+                    console.log('Пароль обновлен');
                     let newData = {
-                        username: userData[0].username,
+                        username: userData.username,
                         password: confirmNewPassword
                     };
+                    collection.updateOne({username : userData.username}, {$set: {password : confirmNewPassword}});
                     console.log(newData);
                     res.send('Updated');
                     return;
