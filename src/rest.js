@@ -7,14 +7,13 @@ const config = require('./config');
 const user = require('./user');
 const watershed = require('watershed');
 const server = restify.createServer({handleUpgrades: true});
-const serveStatic = require('serve-static-restify');
 const ws = new watershed.Watershed();
 
 server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 
 server.use(rjwt(config.jwt).unless({
-    path: ['/auth', '/user', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync', '/changePassword'],
+    path: ['/auth', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync', '/changePassword'],
 }));
 
 const url = "mongodb://eeenkeeei:shiftr123@ds163825.mlab.com:63825/heroku_hw9cvg3q";
@@ -42,19 +41,24 @@ server.get('/user', (req, res, next) => {
 server.post('/auth', (req, res, next) => {
     let {username, password} = req.body;
     console.log(username, password);
-    user.authenticate(username, password).then(data => {
-        console.log(data);
-        if (data === null) {
-            res.send('Null');
-        }
-        let token = jwt.sign(data, config.jwt.secret, {
-            expiresIn: '15m'
-        });
+    try {
+        user.authenticate(username, password).then((data, err) => {
+            console.log(data);
+            if (data === null) {
+                res.send('Null');
+            }
+            let token = jwt.sign(data, config.jwt.secret, {
+                expiresIn: '15m'
+            });
 
-        let {iat, exp} = jwt.decode(token);
-        console.log('token', token);
-        res.send({iat, exp, token});
-    });
+            let {iat, exp} = jwt.decode(token);
+            console.log('token', token);
+            res.send({iat, exp, token});
+        });
+    } catch (err) {
+        return next(new InvalidCredentialsError('Bad auth'));
+    }
+
 });
 let resultFlag = '';
 
