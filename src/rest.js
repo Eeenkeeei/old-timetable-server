@@ -1,7 +1,7 @@
 const restify = require('restify');
 const {BadRequestError, NotFoundError, InvalidCredentialsError, UnauthorizedError} = require('restify-errors');
 const MongoClient = require("mongodb").MongoClient;
-const rjwt = require('restify-jwt');
+const rjwt = require('restify-jwt-community');
 const jwt = require('jsonwebtoken');
 const config = require('./config');
 const user = require('./user');
@@ -300,3 +300,48 @@ server.listen(port, () => {
     console.log('server started');
 
 });
+
+
+// todo:
+//
+// const clients = new Set();
+//
+// server.get('/', (req, res, next) => {
+//     res.send('hello world');
+// });
+//
+// server.get('/ws', (req, res, next) => {
+//     if (!res.claimUpgrade) {
+//         next(new Error('Connection Must Upgrade For WebSockets'));
+//         return;
+//     }
+//     const upgrade = res.claimUpgrade();
+//     const shed = ws.accept(req, upgrade.socket, upgrade.head);
+//
+//     console.log('client connected');
+//
+//     clients.add(shed);
+//     shed.on('text', () => {
+//         console.log('client send something');
+//     });
+//
+//     shed.on('end', () => {
+//         console.log('client disconnected');
+//         clients.delete(shed);
+//         console.log(clients.size);
+//     });
+//
+//     next(false);
+// });
+//
+// setInterval(() => {
+//     for (const client of clients) {
+//         client.send(`clients count: ${clients.size}`);
+//     }
+// }, 5000);
+//
+// const port = process.env.PORT || 7777;
+// server.listen(port, () => {
+//     console.log('server started');
+// });
+
