@@ -1,7 +1,7 @@
 const restify = require('restify');
 const {BadRequestError, NotFoundError, InvalidCredentialsError, UnauthorizedError} = require('restify-errors');
 const MongoClient = require("mongodb").MongoClient;
-const rjwt = require('restify-jwt');
+const rjwt = require('./jwt-middleware');
 const jwt = require('jsonwebtoken');
 const config = require('./config');
 const user = require('./user');
