@@ -24,11 +24,12 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "jsonwebtoken": "^8.5.0",
+    "async": "^2.6.2",
+    "express-unless": "^0.5.0",
+    "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.1.13",
     "restify": "^7.7.0",
     "restify-errors": "^6.1.1",
-    "restify-jwt": "^0.3.0",
     "serve-static": "^1.13.2",
     "serve-static-restify": "^3.0.0",
     "watershed": "^0.4.0"
@@ -38,11 +39,10 @@
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.3.1",
     "babel-jest": "^24.1.0",
-    "mongodb": "^3.1.13",
     "jest": "^24.1.0",
     "live-server": "^1.2.1",
+    "mongodb": "^3.1.13",
     "nodemon": "^1.18.10",
-    "restify-jwt": "^0.3.0",
     "serve-static": "^1.13.2",
     "serve-static-restify": "^3.0.0"
   }
