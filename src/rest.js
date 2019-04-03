@@ -195,7 +195,38 @@ server.post('/registration', (req, res, next) => {
             readLater: [{linkName: "name", linkTag: "tags", link: "link", done: "done"}],
             tasks: [{taskName: "name", done: "done"}, {taskName: "name1", done: "done"}],
             notes: [{noteName: "noteName1", note: "note text"}],
-            lessonsTimetable: req.body.lessonsTimetable,
+            lessonsTimetable: [
+                {
+                    start: '8:00',
+                    end: '9:30',
+                    number: 'first'
+                },
+                {
+                    start: '9:40',
+                    end: '11:10',
+                    number: 'second'
+                },
+                {
+                    start: '11:20',
+                    end: '12:50',
+                    number: 'third'
+                },
+                {
+                    start: '13:30',
+                    end: '15:00',
+                    number: 'fourth'
+                },
+                {
+                    start: '15:10',
+                    end: '16:40',
+                    number: 'fifth'
+                },
+                {
+                    start: '16:50',
+                    end: '18:20',
+                    number: 'sixth'
+                }
+            ],
             startPage: 'account.html'
         }
     ;
@@ -218,7 +249,7 @@ server.post('/registration', (req, res, next) => {
 
     if (user.username.length < 4 || user.password.length < 7) {
         console.log('Не удовл. условиям');
-        resultFlag = 'Bad Request'; // отправит bad Request если нарушены условия по длине
+        resultFlag = 'Bad Request';
         res.send(resultFlag);
         next();
         return;
