@@ -80,12 +80,15 @@ server.post('/timetableUpdate', (req, res, next) => {
             edu: req.body.edu,
             gender: req.body.gender,
             age: req.body.age,
+            noteTags: req.noteTags,
             timetable: req.body.timetable,
             readLater: req.body.readLater,
             tasks: req.body.tasks,
             notes: req.body.notes,
             lessonsTimetable: req.body.lessonsTimetable,
-            startPage: req.body.startPage
+            startPage: req.body.startPage,
+            support: req.body.support,
+            lecturers: req.body.lecturers
         });
         resultFlag = 'Timetable Updated';
         console.log(resultFlag);
@@ -170,12 +173,15 @@ server.post('/updateData', (req, res, next) => {
             edu: req.body.edu,
             gender: req.body.gender,
             age: req.body.age,
+            noteTags: req.noteTags,
             timetable: req.body.timetable,
             readLater: req.body.readLater,
             tasks: req.body.tasks,
             notes: req.body.notes,
             lessonsTimetable: req.body.lessonsTimetable,
-            startPage: req.body.startPage
+            startPage: req.body.startPage,
+            support: req.body.support,
+            lecturers: req.body.lecturers
         });
         resultFlag = 'Data updated';
         console.log(resultFlag);
@@ -193,8 +199,22 @@ server.post('/registration', (req, res, next) => {
             email: req.body.email, gender: req.body.gender, age: req.body.age,
             timetable,
             readLater: [{linkName: "name", linkTag: "tags", link: "link", done: "done"}],
-            tasks: [{taskName: "name", done: "done"}, {taskName: "name1", done: "done"}],
-            notes: [{noteName: "noteName1", note: "note text"}],
+            tasks: [],
+            notes: [],
+            noteTags: [
+                {
+                    tagText: 'Важное',
+                    tagClass: 'danger'
+                },
+                {
+                    tagText: 'Среднее',
+                    tagClass: 'warning'
+                },
+                {
+                    tagText: 'Не срочно',
+                    tagClass: 'success'
+                }
+            ],
             lessonsTimetable: [
                 {
                     start: '8:00',
@@ -227,7 +247,9 @@ server.post('/registration', (req, res, next) => {
                     number: 'sixth'
                 }
             ],
-            startPage: 'account.html'
+            startPage: 'account.html',
+            support: [],
+            lecturers: []
         }
     ;
 
