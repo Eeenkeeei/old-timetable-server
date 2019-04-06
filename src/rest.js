@@ -80,7 +80,6 @@ server.post('/timetableUpdate', (req, res, next) => {
             edu: req.body.edu,
             gender: req.body.gender,
             age: req.body.age,
-            noteTags: req.noteTags,
             timetable: req.body.timetable,
             readLater: req.body.readLater,
             tasks: req.body.tasks,
@@ -88,7 +87,8 @@ server.post('/timetableUpdate', (req, res, next) => {
             lessonsTimetable: req.body.lessonsTimetable,
             startPage: req.body.startPage,
             support: req.body.support,
-            lecturers: req.body.lecturers
+            lecturers: req.body.lecturers,
+            noteTags: req.body.noteTags
         });
         resultFlag = 'Timetable Updated';
         console.log(resultFlag);
@@ -173,7 +173,6 @@ server.post('/updateData', (req, res, next) => {
             edu: req.body.edu,
             gender: req.body.gender,
             age: req.body.age,
-            noteTags: req.noteTags,
             timetable: req.body.timetable,
             readLater: req.body.readLater,
             tasks: req.body.tasks,
@@ -181,7 +180,8 @@ server.post('/updateData', (req, res, next) => {
             lessonsTimetable: req.body.lessonsTimetable,
             startPage: req.body.startPage,
             support: req.body.support,
-            lecturers: req.body.lecturers
+            lecturers: req.body.lecturers,
+            noteTags: req.body.noteTags
         });
         resultFlag = 'Data updated';
         console.log(resultFlag);
