@@ -8,6 +8,7 @@ const user = require('./user');
 const watershed = require('watershed');
 const server = restify.createServer({handleUpgrades: true});
 const ws = new watershed.Watershed();
+const bcrypt = require('bcryptjs');
 
 server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
@@ -35,7 +36,23 @@ server.pre((req, res, next) => {
 
 server.get('/user', (req, res, next) => {
     console.log('GET USER');
-    res.send(req.user);
+    console.log(req.user.username, req.user.password);
+
+    user.authenticateWithToken(req.user.username, req.user.password).then((data, e) => {
+        try {
+            console.log('data', data);
+            if (data === null) {
+                res.send('Null');
+            }
+            // console.log(data)
+            res.send(data);
+            next()
+        } catch (e) {
+            return next(new InvalidCredentialsError());
+
+        }
+
+    });
 });
 
 server.post('/auth', (req, res, next) => {
@@ -57,11 +74,12 @@ server.post('/auth', (req, res, next) => {
             next()
         } catch (e) {
             return next(new InvalidCredentialsError());
+
         }
 
     });
-
 });
+
 let resultFlag = '';
 
 server.post('/timetableUpdate', (req, res, next) => {
@@ -142,14 +160,12 @@ server.post('/changePassword', (req, res, next) => {
                     res.send('Not confirmed');
                     return;
                 }
-
             }
         });
     });
     console.log(userData);
     next();
 });
-
 
 server.post('/updateData', (req, res, next) => {
     console.log('UPDATE DATA');
@@ -192,10 +208,11 @@ server.post('/updateData', (req, res, next) => {
 
 let timetable = [];
 server.post('/registration', (req, res, next) => {
-    console.log('Пришел объект:');
-    console.log(req.body);
+    console.log('РЕГИСТРАЦИЯ');
+    // console.log(req.body);
+    let hashedPassword = bcrypt.hashSync(req.body.password, 10);
     let user = {
-            username: req.body.nickname, password: req.body.password, edu: req.body.edu,
+            username: req.body.nickname, password: hashedPassword, edu: req.body.edu,
             email: req.body.email, gender: req.body.gender, age: req.body.age,
             timetable,
             readLater: [{linkName: "name", linkTag: "tags", link: "link", done: "done"}],
@@ -283,7 +300,6 @@ server.post('/registration', (req, res, next) => {
         collection.find({username: req.body.nickname}).toArray(function (err, result) {
             if (result.length === 0) {
                 resultFlag = 'true';
-                console.log(resultFlag);
                 console.log('Копий нет');
                 collection.insertOne(user, function (err, result) {
                     console.log('Добавлено');
@@ -311,42 +327,42 @@ server.post('/registration', (req, res, next) => {
 const port = process.env.PORT || 7777;
 let acceptedUsername;
 
-server.get('/updateData', (req, res, next) => {
-    if (!res.claimUpgrade) {
-        next(new Error('Connection Must Upgrade For WebSockets'));
-        return;
-    }
-    const upgrade = res.claimUpgrade();
-    const shed = ws.accept(req, upgrade.socket, upgrade.head);
-
-    shed.on('text', function (msg) {
-        acceptedUsername = msg;
-        console.log('User: ' + msg);
-        const response = {
-            username: acceptedUsername,
-            msg: "Update"
-        };
-        shed.send(JSON.stringify(response));
-    });
-
-    next(false);
-});
-
-server.get('/sync', (req, res, next) => {
-    if (!res.claimUpgrade) {
-        next(new Error('Connection Must Upgrade For WebSockets'));
-        return;
-    }
-    const upgrade = res.claimUpgrade();
-    const shed = ws.accept(req, upgrade.socket, upgrade.head);
-
-    const response = {
-        username: acceptedUsername,
-        msg: "Update"
-    };
-    shed.send(JSON.stringify(response));
-    next(false);
-});
+// server.get('/updateData', (req, res, next) => {
+//     if (!res.claimUpgrade) {
+//         next(new Error('Connection Must Upgrade For WebSockets'));
+//         return;
+//     }
+//     const upgrade = res.claimUpgrade();
+//     const shed = ws.accept(req, upgrade.socket, upgrade.head);
+//
+//     shed.on('text', function (msg) {
+//         acceptedUsername = msg;
+//         console.log('User: ' + msg);
+//         const response = {
+//             username: acceptedUsername,
+//             msg: "Update"
+//         };
+//         shed.send(JSON.stringify(response));
+//     });
+//
+//     next(false);
+// });
+//
+// server.get('/sync', (req, res, next) => {
+//     if (!res.claimUpgrade) {
+//         next(new Error('Connection Must Upgrade For WebSockets'));
+//         return;
+//     }
+//     const upgrade = res.claimUpgrade();
+//     const shed = ws.accept(req, upgrade.socket, upgrade.head);
+//
+//     const response = {
+//         username: acceptedUsername,
+//         msg: "Update"
+//     };
+//     shed.send(JSON.stringify(response));
+//     next(false);
+// });
 
 
 server.listen(port, () => {
