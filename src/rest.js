@@ -67,7 +67,7 @@ server.post('/auth', (req, res, next) => {
                 // res.send('Null');
             }
             let token = jwt.sign(data, config.jwt.secret, {
-                expiresIn: '15m'
+                expiresIn: '1d'
             });
 
             let {iat, exp} = jwt.decode(token);
