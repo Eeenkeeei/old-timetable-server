@@ -18,8 +18,9 @@ exports.authenticate = (username, password) => {
                 if (data !== null) {
                     if (bcrypt.compareSync(password, data.password) === true){
                     objectToSend = data;
-                    console.log(objectToSend);
-                    console.log('OBJECT SEND')
+                    // console.log(objectToSend);
+                    console.log('OBJECT SEND authenticate');
+                        resolve(objectToSend);
                     }
                 }
                 resolve(objectToSend);
@@ -29,7 +30,7 @@ exports.authenticate = (username, password) => {
 };
 
 
-exports.authenticateWithToken = (username, password) => {
+exports.returnUpdatedObject = (username, password) => {
     return new Promise((resolve, reject) => {
         mongoClient.connect(function (err, client) {
             const db = client.db("heroku_hw9cvg3q");
@@ -40,8 +41,7 @@ exports.authenticateWithToken = (username, password) => {
                 if (data !== null) {
                     if (password === data.password){
                         objectToSend = data;
-                        console.log(objectToSend);
-                        console.log('OBJECT SEND')
+                        console.log('OBJECT SEND returnUpdatedObject')
                     }
                 }
                 resolve(objectToSend);

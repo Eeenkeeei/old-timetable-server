@@ -37,10 +37,11 @@ server.pre((req, res, next) => {
 server.get('/user', (req, res, next) => {
     console.log('GET USER');
     console.log(req.user.username, req.user.password);
-
-    user.authenticateWithToken(req.user.username, req.user.password).then((data, e) => {
+    const decodedObject = jwt.verify(req.headers.authorization.split(' ')[1], config.jwt.secret);
+    console.log(decodedObject);
+    user.returnUpdatedObject(decodedObject.username, decodedObject.password).then((data, e) => {
         try {
-            console.log('data', data);
+            // console.log('data', data);
             if (data === null) {
                 res.send('Null');
             }
@@ -60,9 +61,10 @@ server.post('/auth', (req, res, next) => {
     console.log(username, password);
     user.authenticate(username, password).then((data, e) => {
         try {
-            console.log(data);
+            // console.log(data);
             if (data === null) {
-                res.send('Null');
+                return next(new InvalidCredentialsError());
+                // res.send('Null');
             }
             let token = jwt.sign(data, config.jwt.secret, {
                 expiresIn: '15m'
@@ -76,6 +78,7 @@ server.post('/auth', (req, res, next) => {
             return next(new InvalidCredentialsError());
 
         }
+
 
     });
 });
