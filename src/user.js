@@ -16,10 +16,10 @@ exports.authenticate = (username, password) => {
                 if (err) return reject(err);
                 let objectToSend = null;
                 if (data !== null) {
-                    if (bcrypt.compareSync(password, data.password) === true){
-                    objectToSend = data;
-                    // console.log(objectToSend);
-                    console.log('OBJECT SEND authenticate');
+                    if (bcrypt.compareSync(password, data.password) === true) {
+                        objectToSend = data;
+                        // console.log(objectToSend);
+                        console.log('OBJECT SEND authenticate');
                         resolve(objectToSend);
                     }
                 }
@@ -35,13 +35,16 @@ exports.returnUpdatedObject = (username, password) => {
         mongoClient.connect(function (err, client) {
             const db = client.db("heroku_hw9cvg3q");
             const collection = db.collection("users");
-            collection.findOne({username}, (err, data) => { //  в data возвращается объект
+            collection.findOne({username, password}, (err, data) => { //  в data возвращается объект
                 if (err) return reject(err);
                 let objectToSend = null;
                 if (data !== null) {
-                    if (password === data.password){
+                    if (password === data.password) {
                         objectToSend = data;
                         console.log('OBJECT SEND returnUpdatedObject')
+                    }
+                    if (password !== data.password) {
+                        console.log('Старый пароль был изменен');
                     }
                 }
                 resolve(objectToSend);

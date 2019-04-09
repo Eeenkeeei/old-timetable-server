@@ -142,23 +142,24 @@ server.post('/changePassword', (req, res, next) => {
         collection.find({username: req.body.username}).toArray(function (err, result) {
             if (result.length !== 0) {
                 userData = result[0];
-                if (newPassword === userData.password) {
+                if (bcrypt.compareSync(newPassword, userData.password) === true) {
                     console.log('Старый и новый пароль совпадает');
                     res.send('Passwords matches');
                     next();
                     return;
                 }
-                if (userData.password === oldPassword) {
+                if (bcrypt.compareSync(oldPassword, userData.password) === true) {
                     console.log('Пароль обновлен');
                     let newData = {
                         username: userData.username,
                         password: confirmNewPassword
                     };
-                    collection.updateOne({username: userData.username}, {$set: {password: confirmNewPassword}});
-                    console.log(newData);
+                    collection.updateOne({username: userData.username}, {$set: {password: bcrypt.hashSync(confirmNewPassword, 10)}});
+                    // console.log(newData);
                     res.send('Updated');
                     return;
-                } else {
+                }
+                if (bcrypt.compareSync(oldPassword, userData.password) === false) {
                     console.log('Старый пароль не совпадает');
                     res.send('Not confirmed');
                     return;
@@ -166,7 +167,6 @@ server.post('/changePassword', (req, res, next) => {
             }
         });
     });
-    console.log(userData);
     next();
 });
 
