@@ -14,12 +14,17 @@ server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 
 server.use(rjwt(config.jwt).unless({
-    path: ['/auth', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync', '/changePassword'],
+    path: ['/auth', '/test', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync', '/changePassword'],
 }));
 
 const url = "mongodb://eeenkeeei:shiftr123@ds163825.mlab.com:63825/heroku_hw9cvg3q";
 const mongoClient = new MongoClient(url, {useNewUrlParser: true});
 
+let collection;
+mongoClient.connect(function (err, client) {
+    const db = client.db("heroku_hw9cvg3q");
+    collection = db.collection("users");
+});
 
 server.pre((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*'); // * - разрешаем всем
@@ -32,6 +37,14 @@ server.pre((req, res, next) => {
     }
 
     next();
+});
+
+server.post('/test', (req, res, next) => {
+    console.log(req.body);
+    collection.find().toArray(function(err, results){
+        res.send(results);
+        next();
+    });
 });
 
 server.get('/user', (req, res, next) => {
@@ -78,8 +91,6 @@ server.post('/auth', (req, res, next) => {
             return next(new InvalidCredentialsError());
 
         }
-
-
     });
 });
 
