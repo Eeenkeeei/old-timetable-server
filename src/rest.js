@@ -14,7 +14,7 @@ server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 
 server.use(rjwt(config.jwt).unless({
-    path: ['/auth', '/test', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync', '/changePassword'],
+    path: ['/auth', '/addAnswer', '/getSupportList', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync', '/changePassword'],
 }));
 
 const url = "mongodb://eeenkeeei:shiftr123@ds163825.mlab.com:63825/heroku_hw9cvg3q";
@@ -35,17 +35,34 @@ server.pre((req, res, next) => {
         next(false);
         return;
     }
-
     next();
 });
 
-server.post('/test', (req, res, next) => {
-    console.log(req.body);
+
+server.get('/getSupportList', (req, res, next) => {
     collection.find().toArray(function(err, results){
         res.send(results);
         next();
     });
 });
+
+server.post('/addAnswer', (req, res, next) => {
+    console.log(req.body);
+    collection.find({username: req.body.username}).toArray(function (err, result) {
+        let supportArray = result[0].support;
+        for (const question of supportArray) {
+            if (question.theme === req.body.theme && question.question === req.body.question){
+                supportArray[supportArray.indexOf(question)].status = req.body.status;
+                collection.updateOne({username: req.body.username}, {$set: {support: supportArray}});
+                console.log('Answer added');
+                return;
+            }
+        }
+    });
+    res.send('updated');
+    next()
+});
+
 
 server.get('/user', (req, res, next) => {
     console.log('GET USER');
@@ -63,9 +80,7 @@ server.get('/user', (req, res, next) => {
             next()
         } catch (e) {
             return next(new InvalidCredentialsError());
-
         }
-
     });
 });
 
