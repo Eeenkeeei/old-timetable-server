@@ -14,7 +14,7 @@ server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 
 server.use(rjwt(config.jwt).unless({
-    path: ['/auth', '/addNews', '/confirmAdminPassword' , '/addAnswer', '/getSupportList', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync', '/changePassword'],
+    path: ['/getNewsList', '/auth', '/addNews', '/confirmAdminPassword' , '/addAnswer', '/getSupportList', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync', '/changePassword'],
 }));
 
 const url = "mongodb://eeenkeeei:shiftr123@ds163825.mlab.com:63825/heroku_hw9cvg3q";
@@ -43,6 +43,13 @@ server.pre((req, res, next) => {
 
 server.get('/getSupportList', (req, res, next) => {
     collection.find().toArray(function(err, results){
+        res.send(results);
+        next();
+    });
+});
+
+server.get('/getNewsList', (req, res, next) => {
+    news.find().toArray(function(err, results){
         res.send(results);
         next();
     });
