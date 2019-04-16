@@ -14,7 +14,7 @@ server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 
 server.use(rjwt(config.jwt).unless({
-    path: ['/auth', '/addAnswer', '/getSupportList', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync', '/changePassword'],
+    path: ['/auth', '/confirmAdminPassword' , '/addAnswer', '/getSupportList', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync', '/changePassword'],
 }));
 
 const url = "mongodb://eeenkeeei:shiftr123@ds163825.mlab.com:63825/heroku_hw9cvg3q";
@@ -44,6 +44,17 @@ server.get('/getSupportList', (req, res, next) => {
         res.send(results);
         next();
     });
+});
+
+server.post('/confirmAdminPassword', (req, res, next) => {
+    console.log('confirm', req.body);
+    const password = 'shiftr123';
+    if (req.body.password === password){
+        res.send('confirm')
+    } else {
+        res.send('not confirm')
+    }
+    next();
 });
 
 server.post('/addAnswer', (req, res, next) => {
