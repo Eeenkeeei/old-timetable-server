@@ -14,16 +14,18 @@ server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 
 server.use(rjwt(config.jwt).unless({
-    path: ['/auth', '/confirmAdminPassword' , '/addAnswer', '/getSupportList', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync', '/changePassword'],
+    path: ['/auth', '/addNews', '/confirmAdminPassword' , '/addAnswer', '/getSupportList', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync', '/changePassword'],
 }));
 
 const url = "mongodb://eeenkeeei:shiftr123@ds163825.mlab.com:63825/heroku_hw9cvg3q";
 const mongoClient = new MongoClient(url, {useNewUrlParser: true});
 
 let collection;
+let news;
 mongoClient.connect(function (err, client) {
     const db = client.db("heroku_hw9cvg3q");
     collection = db.collection("users");
+    news = db.collection("news")
 });
 
 server.pre((req, res, next) => {
@@ -45,6 +47,24 @@ server.get('/getSupportList', (req, res, next) => {
         next();
     });
 });
+
+server.post('/addNews', (req, res, next) => {
+    console.log(req.body);
+    let object = {
+        header: req.body.header,
+        author: req.body.author,
+        text: req.body.body
+    };
+
+    news.insertOne(object, function (err, result) {
+        console.log('Добавлено');
+        res.send('added');
+        if (err) {
+            return console.log(err);
+        }
+    });
+});
+
 
 server.post('/confirmAdminPassword', (req, res, next) => {
     console.log('confirm', req.body);
