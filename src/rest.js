@@ -14,7 +14,7 @@ server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 
 server.use(rjwt(config.jwt).unless({
-    path: ['/getNewsList', '/auth', '/addNews', '/confirmAdminPassword' , '/addAnswer', '/getSupportList', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync', '/changePassword'],
+    path: ['/removeNews', '/getNewsList', '/auth', '/addNews', '/confirmAdminPassword', '/addAnswer', '/getSupportList', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync', '/changePassword'],
 }));
 
 const url = "mongodb://eeenkeeei:shiftr123@ds163825.mlab.com:63825/heroku_hw9cvg3q";
@@ -42,16 +42,23 @@ server.pre((req, res, next) => {
 
 
 server.get('/getSupportList', (req, res, next) => {
-    collection.find().toArray(function(err, results){
+    collection.find().toArray(function (err, results) {
         res.send(results);
         next();
     });
 });
 
 server.get('/getNewsList', (req, res, next) => {
-    news.find().toArray(function(err, results){
+    news.find().toArray(function (err, results) {
         res.send(results);
         next();
+    });
+});
+
+server.post('/removeNews', (req, res, next) => {
+    console.log(req.body.id);
+    news.deleteOne({text: req.body.text}, function (err, result) {
+
     });
 });
 
@@ -76,7 +83,7 @@ server.post('/addNews', (req, res, next) => {
 server.post('/confirmAdminPassword', (req, res, next) => {
     console.log('confirm', req.body);
     const password = 'shiftr123';
-    if (req.body.password === password){
+    if (req.body.password === password) {
         res.send('confirm')
     } else {
         res.send('not confirm')
@@ -89,7 +96,7 @@ server.post('/addAnswer', (req, res, next) => {
     collection.find({username: req.body.username}).toArray(function (err, result) {
         let supportArray = result[0].support;
         for (const question of supportArray) {
-            if (question.theme === req.body.theme && question.question === req.body.question){
+            if (question.theme === req.body.theme && question.question === req.body.question) {
                 supportArray[supportArray.indexOf(question)].status = req.body.status;
                 collection.updateOne({username: req.body.username}, {$set: {support: supportArray}});
                 console.log('Answer added');
