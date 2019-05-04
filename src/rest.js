@@ -14,7 +14,7 @@ server.use(restify.plugins.bodyParser());
 server.use(restify.plugins.queryParser());
 
 server.use(rjwt(config.jwt).unless({
-    path: ['/removeNews', '/getNewsList', '/auth', '/addNews', '/confirmAdminPassword', '/addAnswer', '/getSupportList', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync', '/changePassword'],
+    path: ['/testlog', '/removeNews', '/getNewsList', '/auth', '/addNews', '/confirmAdminPassword', '/addAnswer', '/getSupportList', '/registration', '/updateData', '/websocket/attach', '/timetableUpdate', '/sync', '/changePassword'],
 }));
 
 const url = "mongodb://eeenkeeei:shiftr123@ds163825.mlab.com:63825/heroku_hw9cvg3q";
@@ -22,11 +22,15 @@ const mongoClient = new MongoClient(url, {useNewUrlParser: true});
 
 let collection;
 let news;
+let log;
 mongoClient.connect(function (err, client) {
     const db = client.db("heroku_hw9cvg3q");
     collection = db.collection("users");
-    news = db.collection("news")
+    news = db.collection("news");
+    log = db.collection("log");
 });
+
+
 
 server.pre((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*'); // * - разрешаем всем
@@ -59,6 +63,21 @@ server.post('/removeNews', (req, res, next) => {
     console.log(req.body.id);
     news.deleteOne({text: req.body.text}, function (err, result) {
 
+    });
+});
+
+server.post('/testlog', (req, res, next) => {
+    console.log(req.body);
+    let object = {
+        string: req.body,
+        date: new Date()
+    };
+    log.insertOne(object, function (err, result) {
+        console.log('Добавлено в log');
+        res.send('added');
+        if (err) {
+            return console.log(err);
+        }
     });
 });
 
